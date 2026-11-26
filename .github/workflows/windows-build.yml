@@ -28,6 +28,8 @@ jobs:
       - name: Build Debug
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
         run: cmake --build build --config Debug --parallel 2
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure
       - name: Package Release
         shell: pwsh
         run: |

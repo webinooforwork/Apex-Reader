@@ -5,6 +5,7 @@ Status values describe code in this repository. “Implemented” means present 
 | Feature | Status | Current scope |
 |---|---|---|
 | C++20 / CMake project | Implemented | Qt 6 Widgets target |
+| Core text and registry tests | Implemented | CTest `document_basics` target; Windows/Linux CI runs it |
 | Windows x64 CI packaging | Implemented | Release artifact workflow; not yet observed running |
 | Termux setup/build scripts | Implemented | Uses available Termux Qt package |
 | Plain text reading | Implemented | UTF-8, read-only, 32 MiB file limit |

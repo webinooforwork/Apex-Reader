@@ -1,3 +1,3 @@
 # Testing
 
-Automated test coverage is not implemented yet. The current Linux workflow performs a clean configure/build and checks that essential project documentation exists. `scripts/run_tests.sh` is presently a build check despite its historical name. Add test targets and valid, malformed, empty, and large fixture files before claiming subsystem coverage.
+The `document_basics` test exercises extension normalization, registered support, UTF-8 text reading, word counting, and file-open errors. Both GitHub workflows build and run this test. PDF, database, OCR, comparison, and malformed-file fixtures still need dedicated coverage. `scripts/run_tests.sh` builds and runs CTest.

@@ -8,3 +8,4 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build qt6-base-dev
       - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build --parallel 2
+      - run: ctest --test-dir build --output-on-failure
