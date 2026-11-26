@@ -5,13 +5,14 @@ Status values describe code in this repository. “Implemented” means present 
 | Feature | Status | Current scope |
 |---|---|---|
 | C++20 / CMake project | Implemented | Qt 6 Widgets target |
-| Core text and registry tests | Implemented | CTest `document_basics` target; Windows/Linux CI runs it |
+| Core text and registry tests | Tested | CTest `document_basics` target; Windows/Linux CI passes |
+| PDF load, text extraction, malformed-file test | Implemented | CTest `pdf_engine`; pending next Windows CI run |
 | Windows x64 CI packaging | Implemented | Release artifact workflow; not yet observed running |
 | Termux setup/build scripts | Implemented | Uses available Termux Qt package |
 | Plain text reading | Implemented | UTF-8, read-only, 32 MiB file limit |
 | Word count | Implemented | Whitespace token count |
 | Capability registry | Implemented | Explicit unsupported reporting |
-| PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; needs successful CI verification |
+| PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; Windows CI compiles and packages it |
 | PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
 | DOCX/XLSX/PPTX | Unsupported | No OOXML parser/renderers |
 | OpenDocument | Unsupported | No parser |
