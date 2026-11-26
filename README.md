@@ -6,7 +6,7 @@ APEX is a native C++20 Windows document workspace developed from Termux and buil
 
 This is an early release and the universal workspace is being built in stages. The Qt 6 desktop app reads UTF-8 text (`.txt`, `.log`, `.md`), opens CSV/TSV files in a bounded read-only table, and, when Qt PDF is installed, uses PDFium through Qt PDF for PDF viewing. PDF controls include continuous or single-page mode, fit/custom zoom, full-text search with highlights, search-result navigation, password prompts, and text export. All current readers are read-only; Markdown is displayed as source text. DOCX uses a bounded ZIP/XML extractor for paragraphs, heading styles, and table-cell text, without page-layout rendering. PDF is listed as supported only in builds that include the PDF engine. Other Office and OpenDocument formats remain unsupported.
 
-See [FEATURE_STATUS.md](FEATURE_STATUS.md) for the implementation ledger. XLSX/PPTX, OCR, and AI engines are not implemented yet.
+See [FEATURE_STATUS.md](FEATURE_STATUS.md) for the implementation ledger. PPTX, OCR, and AI engines are not implemented yet. XLSX now provides bounded value and formula inspection without calculation or style rendering.
 
 ## Build
 
@@ -22,8 +22,12 @@ Open a supported text, DOCX, or PDF document, then select **Inspect → Document
 
 ## Local document search
 
-Use **Library → Index folder** to build or refresh the per-user SQLite FTS5 index for text, Markdown source, logs, CSV/TSV, and DOCX paragraph text. Scanning runs in a cancellable background thread. Use **Library → Search indexed documents** (Ctrl+Shift+F) to search all terms and open a result. PDF and image OCR indexing are not included yet. Extracted content remains in the local application data directory.
+Use **Library → Index folder** to build or refresh the per-user SQLite FTS5 index for text, Markdown source, logs, CSV/TSV, DOCX paragraph text, and XLSX values/formulas. Scanning runs in a cancellable background thread. Use **Library → Search indexed documents** (Ctrl+Shift+F) to search all terms and open a result. PDF and image OCR indexing are not included yet. Extracted content remains in the local application data directory.
 
 ## CSV and TSV
 
 CSV and TSV open as read-only tables with quoted fields, embedded line breaks in quoted cells, cell selection, and find-next. Files are capped at 500,000 cells and the existing 32 MiB text limit. Formula evaluation and workbook features are not available for these formats.
+
+## XLSX inspection
+
+XLSX opens as multiple worksheet tabs with read-only cells, cached formula results, and an option to show stored formula expressions. APEX does not evaluate formulas or reproduce Excel formatting, charts, or pivots.

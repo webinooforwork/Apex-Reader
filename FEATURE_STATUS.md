@@ -15,9 +15,11 @@ Status values describe code in this repository. “Implemented” means present 
 | PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; Windows CI compiles and packages it |
 | PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
 | DOCX text extraction | Tested | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; bounded ZIP/XML; Windows/Linux regression tests pass |
-| XLSX/PPTX | Unsupported | No workbook or presentation parser/renderers |
+| CSV/TSV table view | Implemented | Read-only model with quoted/multiline cells, cell selection and find-next, bounded to 500,000 cells; not runtime-tested in this turn |
+| XLSX workbook inspection | Implemented | Read-only multi-sheet cells, shared/inline strings, cached values, formula text view; 300,000-cell and 256 MiB expanded XML limits; no calculation/styles/charts; not runtime-tested in this turn |
+| PPTX | Unsupported | No presentation parser/renderers |
 | OpenDocument | Unsupported | No parser |
-| Persistent full-text search | Implemented | SQLite FTS5; cancellable recursive indexing for UTF-8 text, Markdown source, logs, CSV/TSV, and DOCX extracted text; incremental by file size and modification time; not runtime-tested in this turn |
+| Persistent full-text search | Implemented | SQLite FTS5; cancellable recursive indexing for UTF-8 text, Markdown source, logs, CSV/TSV, DOCX, and XLSX extracted values/formulas; incremental by file size and modification time; not runtime-tested in this turn |
 | PDF/OCR/metadata indexing, regex, saved searches, semantic search | Planned | — |
 | OCR | Planned | — |
 | Comparison | Planned | — |
@@ -25,5 +27,5 @@ Status values describe code in this repository. “Implemented” means present 
 | Plugin system | Planned | — |
 | Document DNA | Implemented | On-demand text structure analysis for open text, DOCX, and PDF documents: word/character/paragraph counts, reading-time estimate, repeated paragraphs, headings, and paragraph-length profile; not runtime-tested in this turn |
 | Document timeline / knowledge graph | Planned | — |
-| Text, PDF, and DOCX automated checks | Implemented | CTest targets run in CI; Windows PDF/DOCX/text tests pass; Linux DOCX/text tests pass |
+| Automated checks | Implemented | Existing CTest targets retained; CI only runs them through manual workflow dispatch when selected; no tests were run for current changes |
 | Performance benchmarks | Planned | — |

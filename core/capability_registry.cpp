@@ -17,7 +17,7 @@ const std::vector<Capability>& CapabilityRegistry::all() {
 #else
  {"docx","Word OOXML",Support::Unsupported,"DOCX engine not available in this build"},
 #endif
- {"xlsx","Excel OOXML",Support::Unsupported,"No workbook parser linked yet"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
+ {"xlsx","Excel OOXML",Support::Viewing,"Read-only multi-sheet cell inspection with shared strings, cached values, and formula display; no calculation or style rendering"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
  {"odt","OpenDocument Text",Support::Unsupported,"No OpenDocument parser linked yet"}, {"ods","OpenDocument Spreadsheet",Support::Unsupported,"No OpenDocument parser linked yet"}, {"odp","OpenDocument Presentation",Support::Unsupported,"No OpenDocument parser linked yet"},
  {"rtf","Rich Text Format",Support::Unsupported,"No RTF parser linked yet"}, {"html","HTML",Support::Unsupported,"No safe HTML document engine linked yet"}, {"epub","EPUB",Support::Unsupported,"No EPUB engine linked yet"}, {"png","PNG image",Support::Unsupported,"No image viewer connected yet"}, {"jpg","JPEG image",Support::Unsupported,"No image viewer connected yet"}
  }; return items;
