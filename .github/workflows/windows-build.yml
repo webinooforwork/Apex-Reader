@@ -1,0 +1,44 @@
+name: Windows build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: Also build Debug
+        type: boolean
+        default: false
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          cache: true
+      - uses: microsoft/setup-msbuild@v2
+      - name: Configure Release
+        run: cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+      - name: Build Release
+        run: cmake --build build/release --config Release
+      - name: Configure Debug
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
+        run: cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+      - name: Build Debug
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
+        run: cmake --build build/debug --config Debug
+      - name: Package Release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force package | Out-Null
+          Copy-Item build/release/ApexOfficeReader.exe package/
+          windeployqt --release package/ApexOfficeReader.exe
+          Compress-Archive -Path package/* -DestinationPath ApexOfficeReader-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ApexOfficeReader-windows-x64
+          path: ApexOfficeReader-windows-x64.zip
