@@ -15,3 +15,7 @@ See [FEATURE_STATUS.md](FEATURE_STATUS.md) for the implementation ledger. XLSX/P
 - Linux development: install CMake, Ninja, Qt 6 Widgets, and libzip, then run `sh scripts/run_tests.sh` which builds and runs the available CTest checks.
 
 See [BUILDING.md](BUILDING.md) and [DEPENDENCIES.md](DEPENDENCIES.md).
+
+## Document DNA
+
+Open a supported text, DOCX, or PDF document, then select **Inspect → Document DNA** (Ctrl+Shift+D) for content-derived structure metrics, repeated paragraph detection, heading markers, and an estimated reading time. Metrics reflect extracted text only; image content and unsupported embedded parts are not analyzed.

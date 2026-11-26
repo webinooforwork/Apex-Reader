@@ -22,6 +22,7 @@ Status values describe code in this repository. “Implemented” means present 
 | Comparison | Planned | — |
 | AI assistance | Planned | — |
 | Plugin system | Planned | — |
-| Document DNA / timeline / graph | Planned | — |
+| Document DNA | Implemented | On-demand text structure analysis for open text, DOCX, and PDF documents: word/character/paragraph counts, reading-time estimate, repeated paragraphs, headings, and paragraph-length profile; not runtime-tested in this turn |
+| Document timeline / knowledge graph | Planned | — |
 | Text, PDF, and DOCX automated checks | Implemented | CTest targets run in CI; Windows PDF/DOCX/text tests pass; Linux DOCX/text tests pass |
 | Performance benchmarks | Planned | — |
