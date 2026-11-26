@@ -1,6 +1,7 @@
 #include "main_window.h"
 #include "../core/capability_registry.h"
 #include "../engines/text_document.h"
+#include "../engines/word/docx_document.h"
 #include <QAction>
 #include <QComboBox>
 #include <QFileDialog>
@@ -60,11 +61,12 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),view_(new QPlainText
 #endif
  auto* capabilities=file->addAction("Capabilities"); connect(capabilities,&QAction::triggered,this,[this]{showCapabilities();}); file->addSeparator(); auto* exit=file->addAction("Exit"); connect(exit,&QAction::triggered,this,[this]{close();});
 }
-void MainWindow::openFile(){const auto path=QFileDialog::getOpenFileName(this,"Open document",{},"Documents (*.pdf *.txt *.log *.md *.csv *.tsv);;All files (*.*)");if(!path.isEmpty())loadPath(path);}
+void MainWindow::openFile(){const auto path=QFileDialog::getOpenFileName(this,"Open document",{},"Documents (*.pdf *.docx *.txt *.log *.md *.csv *.tsv);;All files (*.*)");if(!path.isEmpty())loadPath(path);}
 void MainWindow::loadPath(const QString& path){const auto ext=QFileInfo(path).suffix().toLower();
 #ifdef APEX_HAS_PDF
  if(ext=="pdf"){loadPdf(path);return;}
 #endif
+ if(ext=="docx") { DocxDocument document; if(!document.load(path)){QMessageBox::warning(this,"Could not inspect DOCX",document.error);return;} view_->setPlainText(document.text); documentStack_->setCurrentWidget(view_); setWindowTitle(QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName())); status_->setText(QString("%1 • DOCX extracted text • %2 paragraphs • %3 words • Read-only").arg(QFileInfo(path).fileName()).arg(document.paragraphCount).arg(document.words())); return; }
  const auto* capability=CapabilityRegistry::find(ext.toStdString());if(!capability||capability->support==Support::Unsupported){QMessageBox::information(this,"Format not supported",QString("%1\n\n%2").arg(capability?QString::fromStdString(capability->format):"Unknown format",capability?QString::fromStdString(capability->note):"No reader is registered for this extension."));return;}
  TextDocument document;if(!document.load(path)){QMessageBox::warning(this,"Could not open document",document.error);return;}view_->setPlainText(document.text);documentStack_->setCurrentWidget(view_);setWindowTitle(QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName()));status_->setText(QString("%1 • %2 words • Read-only text view").arg(QFileInfo(path).fileName()).arg(document.words()));}
 void MainWindow::loadPdf(const QString& path){

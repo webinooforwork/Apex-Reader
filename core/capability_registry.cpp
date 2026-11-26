@@ -12,7 +12,12 @@ const std::vector<Capability>& CapabilityRegistry::all() {
 #else
  {"pdf","PDF",Support::Unsupported,"Qt PDF (PDFium) was not available in this build"},
 #endif
- {"docx","Word OOXML",Support::Unsupported,"No OOXML parser linked yet"}, {"xlsx","Excel OOXML",Support::Unsupported,"No workbook parser linked yet"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
+#ifdef APEX_HAS_DOCX
+ {"docx","Word OOXML",Support::TextExtraction,"DOCX paragraph, heading, table-cell text extraction; not page-layout rendering"},
+#else
+ {"docx","Word OOXML",Support::Unsupported,"DOCX engine not available in this build"},
+#endif
+ {"xlsx","Excel OOXML",Support::Unsupported,"No workbook parser linked yet"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
  {"odt","OpenDocument Text",Support::Unsupported,"No OpenDocument parser linked yet"}, {"ods","OpenDocument Spreadsheet",Support::Unsupported,"No OpenDocument parser linked yet"}, {"odp","OpenDocument Presentation",Support::Unsupported,"No OpenDocument parser linked yet"},
  {"rtf","Rich Text Format",Support::Unsupported,"No RTF parser linked yet"}, {"html","HTML",Support::Unsupported,"No safe HTML document engine linked yet"}, {"epub","EPUB",Support::Unsupported,"No EPUB engine linked yet"}, {"png","PNG image",Support::Unsupported,"No image viewer connected yet"}, {"jpg","JPEG image",Support::Unsupported,"No image viewer connected yet"}
  }; return items;

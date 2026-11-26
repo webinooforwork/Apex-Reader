@@ -1,20 +1,21 @@
 # Feature status
 
-Status values describe code in this repository. “Implemented” means present in source; “Verified” requires observed build/runtime evidence. No feature is marked verified yet.
+Status values describe code in this repository. “Implemented” means present in source; “Tested” means automated checks pass in CI; “Verified” requires broader observed runtime evidence.
 
 | Feature | Status | Current scope |
 |---|---|---|
 | C++20 / CMake project | Implemented | Qt 6 Widgets target |
 | Core text and registry tests | Tested | CTest `document_basics` target; Windows/Linux CI passes |
-| PDF load, text extraction, malformed-file test | Implemented | CTest `pdf_engine`; pending next Windows CI run |
-| Windows x64 CI packaging | Implemented | Release artifact workflow; not yet observed running |
+| PDF load, text extraction, malformed-file test | Tested | CTest PDF engine test passes in Windows CI |
+| Windows x64 CI packaging | Implemented | Release ZIP artifact builds and uploads successfully in Windows CI |
 | Termux setup/build scripts | Implemented | Uses available Termux Qt package |
 | Plain text reading | Implemented | UTF-8, read-only, 32 MiB file limit |
 | Word count | Implemented | Whitespace token count |
 | Capability registry | Implemented | Explicit unsupported reporting |
 | PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; Windows CI compiles and packages it |
 | PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
-| DOCX/XLSX/PPTX | Unsupported | No OOXML parser/renderers |
+| DOCX text extraction | Implemented | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; package/XML size limits |
+| XLSX/PPTX | Unsupported | No workbook or presentation parser/renderers |
 | OpenDocument | Unsupported | No parser |
 | Search and persistent index | Planned | — |
 | OCR | Planned | — |
@@ -22,4 +23,5 @@ Status values describe code in this repository. “Implemented” means present 
 | AI assistance | Planned | — |
 | Plugin system | Planned | — |
 | Document DNA / timeline / graph | Planned | — |
-| Automated tests and benchmarks | Planned | No test cases currently |
+| Text, PDF, and DOCX automated checks | Implemented | CTest targets run in CI; DOCX result pending new run |
+| Performance benchmarks | Planned | — |
