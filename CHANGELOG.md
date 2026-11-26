@@ -15,4 +15,4 @@
 ## 0.3.0 — DOCX inspection
 
 - Added bounded DOCX ZIP/XML text extraction for paragraphs, heading styles, tabs, line breaks, and table-cell text. Macros and external package parts are not loaded.
-- Added malformed archive and DTD regression tests and libzip dependency wiring for Termux, Linux CI, and Windows vcpkg builds.
+- Added malformed archive and DTD regression tests and libzip dependency wiring for Termux, Linux CI, and Windows vcpkg builds. The DOCX, PDF, and text CTest targets pass on Windows; Linux text and DOCX targets pass.

@@ -14,7 +14,7 @@ Status values describe code in this repository. “Implemented” means present 
 | Capability registry | Implemented | Explicit unsupported reporting |
 | PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; Windows CI compiles and packages it |
 | PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
-| DOCX text extraction | Implemented | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; package/XML size limits |
+| DOCX text extraction | Tested | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; bounded ZIP/XML; Windows/Linux regression tests pass |
 | XLSX/PPTX | Unsupported | No workbook or presentation parser/renderers |
 | OpenDocument | Unsupported | No parser |
 | Search and persistent index | Planned | — |
@@ -23,5 +23,5 @@ Status values describe code in this repository. “Implemented” means present 
 | AI assistance | Planned | — |
 | Plugin system | Planned | — |
 | Document DNA / timeline / graph | Planned | — |
-| Text, PDF, and DOCX automated checks | Implemented | CTest targets run in CI; DOCX result pending new run |
+| Text, PDF, and DOCX automated checks | Implemented | CTest targets run in CI; Windows PDF/DOCX/text tests pass; Linux DOCX/text tests pass |
 | Performance benchmarks | Planned | — |
