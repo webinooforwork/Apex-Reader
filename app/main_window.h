@@ -32,6 +32,9 @@ private:
   void indexFolder();
   void searchIndexedDocuments();
   void loadPath(const QString &path);
+  void displaySpreadsheet(const QVector<SpreadsheetSheet> &sheets,
+                          const QString &path, const QString &kind,
+                          const QString &searchableText, int cellCount);
   void loadPdf(const QString &path);
   QPlainTextEdit *view_{};
   QLabel *status_{};
@@ -53,6 +56,6 @@ private:
   QWidget *xlsxPage_{};
   QTabWidget *xlsxTabs_{};
   QCheckBox *formulaToggle_{};
-  QVector<XlsxTableModel *> xlsxModels_;
+  QVector<SpreadsheetTableModel *> spreadsheetModels_;
 };
 } // namespace apex

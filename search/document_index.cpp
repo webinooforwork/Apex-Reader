@@ -1,7 +1,9 @@
 #include "document_index.h"
+#include "../engines/spreadsheet/ods_workbook.h"
 #include "../engines/spreadsheet/xlsx_workbook.h"
 #include "../engines/text_document.h"
 #include "../engines/word/docx_document.h"
+#include "../engines/word/opendocument_text.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -85,11 +87,29 @@ QString ftsQuery(const QString &input) {
 }
 
 QStringList indexableExtensions() {
-  return {"txt", "md", "log", "csv", "tsv", "docx", "xlsx"};
+  return {"txt",  "md",   "log", "csv", "tsv",
+          "docx", "xlsx", "ods", "odt", "odp"};
 }
 
 QString extractText(const QString &path, const QString &extension,
                     QString &error) {
+  if (extension == QStringLiteral("ods")) {
+    OdsWorkbook workbook;
+    if (!workbook.load(path)) {
+      error = workbook.error;
+      return {};
+    }
+    return workbook.searchableText();
+  }
+  if (extension == QStringLiteral("odt") ||
+      extension == QStringLiteral("odp")) {
+    OpenDocumentText document;
+    if (!document.load(path, extension == QStringLiteral("odp"))) {
+      error = document.error;
+      return {};
+    }
+    return document.text;
+  }
   if (extension == QStringLiteral("xlsx")) {
     XlsxWorkbook workbook;
     if (!workbook.load(path)) {

@@ -197,7 +197,7 @@ bool loadRelationships(zip_t *archive, QHash<QString, QString> &targets,
 }
 
 bool loadWorkbookSheets(zip_t *archive, const QHash<QString, QString> &targets,
-                        QVector<XlsxSheet> &sheets, QString &error,
+                        QVector<SpreadsheetSheet> &sheets, QString &error,
                         zip_uint64_t &expandedBytes) {
   QByteArray xml;
   if (!readPart(archive, QStringLiteral("xl/workbook.xml"), xml, error,
@@ -230,7 +230,7 @@ bool loadWorkbookSheets(zip_t *archive, const QHash<QString, QString> &targets,
           QStringLiteral("The workbook exceeds the 256-sheet safety limit.");
       return false;
     }
-    XlsxSheet sheet;
+    SpreadsheetSheet sheet;
     sheet.name = name;
     sheet.partPath = *target;
     sheets.append(std::move(sheet));
@@ -247,7 +247,7 @@ bool loadWorkbookSheets(zip_t *archive, const QHash<QString, QString> &targets,
   return true;
 }
 
-bool loadWorksheet(zip_t *archive, XlsxSheet &sheet,
+bool loadWorksheet(zip_t *archive, SpreadsheetSheet &sheet,
                    const QVector<QString> &shared, int &allCells,
                    QString &error, zip_uint64_t &expandedBytes) {
   QByteArray xml;
@@ -268,8 +268,10 @@ bool loadWorksheet(zip_t *archive, XlsxSheet &sheet,
       const QString tag = reader.name().toString();
       if (tag == QStringLiteral("row")) {
         bool valid = false;
-        const int declared =
-            reader.attributes().value(QStringLiteral("r")).toInt(&valid);
+        const int declared = reader.attributes()
+                                 .value(QStringLiteral("r"))
+                                 .toString()
+                                 .toInt(&valid);
         row = valid ? declared - 1 : row + 1;
         if (row < 0 || row >= MaxRows) {
           error = QStringLiteral("Worksheet row is outside Excel's row limit.");
@@ -361,17 +363,18 @@ QString spreadsheetColumnName(int number) {
 }
 } // namespace
 
-XlsxTableModel::XlsxTableModel(const XlsxSheet &sheet, QObject *parent)
+SpreadsheetTableModel::SpreadsheetTableModel(const SpreadsheetSheet &sheet,
+                                             QObject *parent)
     : QAbstractTableModel(parent), sheet_(sheet) {}
 
-int XlsxTableModel::rowCount(const QModelIndex &parent) const {
+int SpreadsheetTableModel::rowCount(const QModelIndex &parent) const {
   return parent.isValid() ? 0 : sheet_.rows;
 }
-int XlsxTableModel::columnCount(const QModelIndex &parent) const {
+int SpreadsheetTableModel::columnCount(const QModelIndex &parent) const {
   return parent.isValid() ? 0 : sheet_.columns;
 }
 
-QVariant XlsxTableModel::data(const QModelIndex &index, int role) const {
+QVariant SpreadsheetTableModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return {};
   const auto row = sheet_.cells.constFind(index.row());
@@ -391,15 +394,16 @@ QVariant XlsxTableModel::data(const QModelIndex &index, int role) const {
   return {};
 }
 
-QVariant XlsxTableModel::headerData(int section, Qt::Orientation orientation,
-                                    int role) const {
+QVariant SpreadsheetTableModel::headerData(int section,
+                                           Qt::Orientation orientation,
+                                           int role) const {
   if (role != Qt::DisplayRole || section < 0)
     return {};
   return orientation == Qt::Vertical ? QVariant(section + 1)
                                      : QVariant(spreadsheetColumnName(section));
 }
 
-void XlsxTableModel::setShowFormulas(bool enabled) {
+void SpreadsheetTableModel::setShowFormulas(bool enabled) {
   if (showFormulas_ == enabled)
     return;
   showFormulas_ = enabled;

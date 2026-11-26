@@ -1,7 +1,9 @@
 #include "main_window.h"
 #include "../core/capability_registry.h"
+#include "../engines/spreadsheet/ods_workbook.h"
 #include "../engines/text_document.h"
 #include "../engines/word/docx_document.h"
+#include "../engines/word/opendocument_text.h"
 #include <QAbstractItemView>
 #include <QAction>
 #include <QCheckBox>
@@ -92,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
   xlsxLayout->addWidget(xlsxTabs_, 1);
   documentStack_->addWidget(xlsxPage_);
   connect(formulaToggle_, &QCheckBox::toggled, this, [this](bool enabled) {
-    for (auto *model : xlsxModels_)
+    for (auto *model : spreadsheetModels_)
       model->setShowFormulas(enabled);
   });
 #ifdef APEX_HAS_PDF
@@ -293,13 +295,51 @@ MainWindow::~MainWindow() {
     indexThread_->wait();
 }
 void MainWindow::openFile() {
-  const auto path =
-      QFileDialog::getOpenFileName(this, "Open document", {},
-                                   "Documents (*.pdf *.docx *.xlsx *.txt *.log "
-                                   "*.md *.csv *.tsv);;All files (*.*)");
+  const auto path = QFileDialog::getOpenFileName(
+      this, "Open document", {},
+      "Documents (*.pdf *.docx *.xlsx *.ods *.odt *.odp *.txt *.log "
+      "*.md *.csv *.tsv);;All files (*.*)");
   if (!path.isEmpty())
     loadPath(path);
 }
+void MainWindow::displaySpreadsheet(const QVector<SpreadsheetSheet> &sheets,
+                                    const QString &path, const QString &kind,
+                                    const QString &searchableText,
+                                    int cellCount) {
+  while (xlsxTabs_->count() > 0) {
+    auto *page = xlsxTabs_->widget(0);
+    xlsxTabs_->removeTab(0);
+    delete page;
+  }
+  for (auto *model : spreadsheetModels_)
+    delete model;
+  spreadsheetModels_.clear();
+  for (const auto &sheet : sheets) {
+    auto *model = new SpreadsheetTableModel(sheet, xlsxPage_);
+    model->setShowFormulas(formulaToggle_->isChecked());
+    spreadsheetModels_.append(model);
+    auto *table = new QTableView(xlsxTabs_);
+    table->setModel(model);
+    table->setAlternatingRowColors(true);
+    table->setWordWrap(false);
+    table->setSelectionBehavior(QAbstractItemView::SelectItems);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    xlsxTabs_->addTab(table, sheet.name);
+  }
+  documentText_ = searchableText;
+  currentPath_ = path;
+  documentKind_ = kind;
+  documentStack_->setCurrentWidget(xlsxPage_);
+  setWindowTitle(
+      QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName()));
+  status_->setText(
+      QString("%1 • %2 sheets • %3 non-empty cells • %4 • Read-only")
+          .arg(QFileInfo(path).fileName())
+          .arg(sheets.size())
+          .arg(cellCount)
+          .arg(kind));
+}
+
 void MainWindow::loadPath(const QString &path) {
   const auto ext = QFileInfo(path).suffix().toLower();
 #ifdef APEX_HAS_PDF
@@ -314,37 +354,45 @@ void MainWindow::loadPath(const QString &path) {
       QMessageBox::warning(this, "Could not inspect XLSX", workbook.error);
       return;
     }
-    while (xlsxTabs_->count() > 0) {
-      auto *page = xlsxTabs_->widget(0);
-      xlsxTabs_->removeTab(0);
-      delete page;
+    displaySpreadsheet(workbook.sheets, path, "XLSX cached values and formulas",
+                       workbook.searchableText(), workbook.cellCount);
+    return;
+  }
+  if (ext == "ods") {
+    OdsWorkbook workbook;
+    if (!workbook.load(path)) {
+      QMessageBox::warning(this, "Could not inspect ODS", workbook.error);
+      return;
     }
-    for (auto *model : xlsxModels_)
-      delete model;
-    xlsxModels_.clear();
-    documentText_ = workbook.searchableText();
+    displaySpreadsheet(workbook.sheets, path, "ODS cell values and formulas",
+                       workbook.searchableText(), workbook.cellCount);
+    return;
+  }
+  if (ext == "odt" || ext == "odp") {
+    OpenDocumentText document;
+    const bool presentation = ext == "odp";
+    if (!document.load(path, presentation)) {
+      QMessageBox::warning(this, "Could not inspect OpenDocument",
+                           document.error);
+      return;
+    }
+    documentText_ = document.text;
     currentPath_ = path;
-    documentKind_ = "XLSX cached values and formulas";
-    for (const auto &sheet : workbook.sheets) {
-      auto *model = new XlsxTableModel(sheet, xlsxPage_);
-      model->setShowFormulas(formulaToggle_->isChecked());
-      xlsxModels_.append(model);
-      auto *table = new QTableView(xlsxTabs_);
-      table->setModel(model);
-      table->setAlternatingRowColors(true);
-      table->setWordWrap(false);
-      table->setSelectionBehavior(QAbstractItemView::SelectItems);
-      table->setSelectionMode(QAbstractItemView::SingleSelection);
-      xlsxTabs_->addTab(table, sheet.name);
-    }
-    documentStack_->setCurrentWidget(xlsxPage_);
+    documentKind_ =
+        presentation ? "ODP slide text extraction" : "ODT text extraction";
+    view_->setPlainText(document.text);
+    documentStack_->setCurrentWidget(view_);
     setWindowTitle(
         QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName()));
-    status_->setText(QString("%1 • %2 sheets • %3 non-empty cells • Values and "
-                             "formula inspection • Read-only")
-                         .arg(QFileInfo(path).fileName())
-                         .arg(workbook.sheets.size())
-                         .arg(workbook.cellCount));
+    status_->setText(
+        presentation
+            ? QString("%1 • %2 slides • Extracted slide text • Read-only")
+                  .arg(QFileInfo(path).fileName())
+                  .arg(document.slideCount)
+            : QString(
+                  "%1 • %2 paragraphs • Extracted document text • Read-only")
+                  .arg(QFileInfo(path).fileName())
+                  .arg(document.paragraphCount));
     return;
   }
   if (ext == "csv" || ext == "tsv") {

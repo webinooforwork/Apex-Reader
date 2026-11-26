@@ -18,8 +18,10 @@ Status values describe code in this repository. “Implemented” means present 
 | CSV/TSV table view | Implemented | Read-only model with quoted/multiline cells, cell selection and find-next, bounded to 500,000 cells; not runtime-tested in this turn |
 | XLSX workbook inspection | Implemented | Read-only multi-sheet cells, shared/inline strings, cached values, formula text view; 300,000-cell and 256 MiB expanded XML limits; no calculation/styles/charts; not runtime-tested in this turn |
 | PPTX | Unsupported | No presentation parser/renderers |
-| OpenDocument | Unsupported | No parser |
-| Persistent full-text search | Implemented | SQLite FTS5; cancellable recursive indexing for UTF-8 text, Markdown source, logs, CSV/TSV, DOCX, and XLSX extracted values/formulas; incremental by file size and modification time; not runtime-tested in this turn |
+| ODS workbook view | Implemented | Read-only multiple sheets, repeated cells/rows, typed cached values and formula text; bounded XML/package and cell counts; not runtime-tested in this turn |
+| ODT text extraction | Implemented | Paragraph/heading text, tabs, line breaks, repeated spaces; not page-layout rendering; not runtime-tested in this turn |
+| ODP slide text extraction | Implemented | Slide-numbered text extraction from content.xml; no slide rendering; not runtime-tested in this turn |
+| Persistent full-text search | Implemented | SQLite FTS5; cancellable recursive indexing for UTF-8 text, Markdown source, logs, CSV/TSV, DOCX/XLSX/ODS extracted content and ODT/ODP text; incremental by file size and modification time; not runtime-tested in this turn |
 | PDF/OCR/metadata indexing, regex, saved searches, semantic search | Planned | — |
 | OCR | Planned | — |
 | Comparison | Planned | — |
