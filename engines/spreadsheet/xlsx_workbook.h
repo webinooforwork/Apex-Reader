@@ -5,21 +5,22 @@
 #include <QString>
 #include <QVector>
 namespace apex {
-struct XlsxCell {
+struct SpreadsheetCell {
   QString value;
   QString formula;
 };
-struct XlsxSheet {
+struct SpreadsheetSheet {
   QString name;
   QString partPath;
   int rows{};
   int columns{};
-  QMap<int, QHash<int, XlsxCell>> cells;
+  QMap<int, QHash<int, SpreadsheetCell>> cells;
 };
-class XlsxTableModel final : public QAbstractTableModel {
+class SpreadsheetTableModel final : public QAbstractTableModel {
   Q_OBJECT
 public:
-  explicit XlsxTableModel(const XlsxSheet &sheet, QObject *parent = nullptr);
+  explicit SpreadsheetTableModel(const SpreadsheetSheet &sheet,
+                                 QObject *parent = nullptr);
   int rowCount(const QModelIndex &parent = {}) const override;
   int columnCount(const QModelIndex &parent = {}) const override;
   QVariant data(const QModelIndex &index,
@@ -29,13 +30,13 @@ public:
   void setShowFormulas(bool enabled);
 
 private:
-  XlsxSheet sheet_;
+  SpreadsheetSheet sheet_;
   bool showFormulas_{};
 };
 
 class XlsxWorkbook {
 public:
-  QVector<XlsxSheet> sheets;
+  QVector<SpreadsheetSheet> sheets;
   QString error;
   int cellCount{};
   bool load(const QString &path);
