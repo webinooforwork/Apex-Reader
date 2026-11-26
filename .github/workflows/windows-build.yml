@@ -20,22 +20,18 @@ jobs:
           target: desktop
           arch: win64_msvc2022_64
           cache: true
-      - uses: microsoft/setup-msbuild@v2
-      - name: Configure Release
-        run: cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+      - name: Configure Visual Studio x64
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
       - name: Build Release
-        run: cmake --build build/release --config Release
-      - name: Configure Debug
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
-        run: cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+        run: cmake --build build --config Release --parallel 2
       - name: Build Debug
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
-        run: cmake --build build/debug --config Debug
+        run: cmake --build build --config Debug --parallel 2
       - name: Package Release
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force package | Out-Null
-          Copy-Item build/release/ApexOfficeReader.exe package/
+          Copy-Item build/Release/ApexOfficeReader.exe package/
           windeployqt --release package/ApexOfficeReader.exe
           Compress-Archive -Path package/* -DestinationPath ApexOfficeReader-windows-x64.zip
       - uses: actions/upload-artifact@v4
