@@ -4,6 +4,7 @@ class QPlainTextEdit;
 class QLabel;
 class QStackedWidget;
 class QPdfDocument;
+class QPdfBookmarkModel;
 class QPdfSearchModel;
 class QPdfView;
 class QSpinBox;
@@ -21,6 +22,7 @@ private:
  QStackedWidget* documentStack_{};
  QPdfDocument* pdfDocument_{};
  QPdfSearchModel* pdfSearch_{};
+ QPdfBookmarkModel* pdfBookmarks_{};
  QPdfView* pdfView_{};
  QSpinBox* pdfPage_{};
 };
