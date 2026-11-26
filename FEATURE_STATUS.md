@@ -17,7 +17,8 @@ Status values describe code in this repository. “Implemented” means present 
 | DOCX text extraction | Tested | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; bounded ZIP/XML; Windows/Linux regression tests pass |
 | XLSX/PPTX | Unsupported | No workbook or presentation parser/renderers |
 | OpenDocument | Unsupported | No parser |
-| Search and persistent index | Planned | — |
+| Persistent full-text search | Implemented | SQLite FTS5; cancellable recursive indexing for UTF-8 text, Markdown source, logs, CSV/TSV, and DOCX extracted text; incremental by file size and modification time; not runtime-tested in this turn |
+| PDF/OCR/metadata indexing, regex, saved searches, semantic search | Planned | — |
 | OCR | Planned | — |
 | Comparison | Planned | — |
 | AI assistance | Planned | — |

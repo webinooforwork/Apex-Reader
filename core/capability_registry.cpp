@@ -5,7 +5,7 @@ namespace apex {
 const std::vector<Capability>& CapabilityRegistry::all() {
  static const std::vector<Capability> items{
  {"txt","Plain text",Support::Viewing,"UTF-8 text display"}, {"md","Markdown",Support::Viewing,"Displayed as source text; Markdown rendering is not yet implemented"},
- {"csv","Comma-separated values",Support::Viewing,"Text display only; no spreadsheet parsing"}, {"tsv","Tab-separated values",Support::Viewing,"Text display only"},
+ {"csv","Comma-separated values",Support::Viewing,"Read-only delimited table with cell navigation and text find; no formula evaluation"}, {"tsv","Tab-separated values",Support::Viewing,"Read-only tab-delimited table with cell navigation and text find"},
  {"log","Text log",Support::Viewing,"UTF-8 text display"},
  #ifdef APEX_HAS_PDF
  {"pdf","PDF",Support::Viewing,"Qt PDF (PDFium): read-only rendering, text search, page navigation, and text export"},

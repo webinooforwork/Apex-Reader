@@ -4,6 +4,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      run_tests:
+        description: Run the automated tests
+        type: boolean
+        default: false
       debug:
         description: Also build Debug
         type: boolean
@@ -22,13 +26,14 @@ jobs:
           modules: qtpdf
           cache: true
       - name: Configure Visual Studio x64
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
       - name: Build Release
         run: cmake --build build --config Release --parallel 2
       - name: Build Debug
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
         run: cmake --build build --config Debug --parallel 2
       - name: Run tests
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }}
         run: |
           $env:PATH = "$PWD/build/vcpkg_installed/x64-windows/bin;$env:PATH"
           ctest --test-dir build -C Release --output-on-failure

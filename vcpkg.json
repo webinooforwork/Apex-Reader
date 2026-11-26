@@ -2,6 +2,7 @@
   "name": "apex-office-reader",
   "version-string": "0.3.0",
   "dependencies": [
-    "libzip"
+    "libzip",
+    {"name":"sqlite3","features":["fts5"]}
   ]
 }

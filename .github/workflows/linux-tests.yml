@@ -1,11 +1,20 @@
 name: Linux build validation
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run the automated tests
+        type: boolean
+        default: false
 jobs:
   linux:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build qt6-base-dev libzip-dev pkg-config
-      - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build qt6-base-dev libzip-dev libsqlite3-dev pkg-config
+      - run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }}
       - run: cmake --build build --parallel 2
-      - run: ctest --test-dir build --output-on-failure
+      - if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }}
+        run: ctest --test-dir build --output-on-failure

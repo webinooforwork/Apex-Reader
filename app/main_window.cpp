@@ -13,6 +13,11 @@
 #include <QListView>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QListWidget>
+#include <QTableView>
+#include <QAbstractItemView>
+#include <QHeaderView>
+#include <QPushButton>
 #include <QPlainTextEdit>
 #include <QSaveFile>
 #include <QSpinBox>
@@ -23,7 +28,6 @@
 #include <QDialog>
 #include <QFormLayout>
 #include <QProgressBar>
-#include <QHBoxLayout>
 #include <QList>
 #include <QRegularExpression>
 #include <QHash>
@@ -43,6 +47,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),view_(new QPlainText
  setWindowTitle("APEX OFFICE READER"); resize(1200,800);
  view_->setReadOnly(true); view_->setLineWrapMode(QPlainTextEdit::NoWrap);
  documentStack_->addWidget(view_);
+ csvDocument_=new CsvDocument(this);csvPage_=new QWidget(this);auto* csvLayout=new QVBoxLayout(csvPage_);auto* csvTools=new QHBoxLayout;csvFind_=new QLineEdit(csvPage_);csvFind_->setPlaceholderText("Find cell text");csvFind_->setClearButtonEnabled(true);auto* findNext=new QPushButton("Find next",csvPage_);csvTools->addWidget(csvFind_,1);csvTools->addWidget(findNext);csvLayout->addLayout(csvTools);csvView_=new QTableView(csvPage_);csvView_->setModel(csvDocument_);csvView_->setSelectionBehavior(QAbstractItemView::SelectItems);csvView_->setSelectionMode(QAbstractItemView::SingleSelection);csvView_->setAlternatingRowColors(true);csvView_->setWordWrap(false);csvView_->horizontalHeader()->setSectionsMovable(true);csvLayout->addWidget(csvView_,1);documentStack_->addWidget(csvPage_);connect(findNext,&QPushButton::clicked,this,[this]{const auto match=csvDocument_->findNext(csvFind_->text(),csvView_->currentIndex());if(match.isValid()){csvView_->setCurrentIndex(match);csvView_->scrollTo(match,QAbstractItemView::PositionAtCenter);}else if(!csvFind_->text().isEmpty())status_->setText("No matching cell found in this table.");});connect(csvFind_,&QLineEdit::returnPressed,findNext,&QPushButton::click);
 #ifdef APEX_HAS_PDF
  pdfDocument_=new QPdfDocument(this); pdfSearch_=new QPdfSearchModel(this); pdfSearch_->setDocument(pdfDocument_); pdfBookmarks_=new QPdfBookmarkModel(this); pdfBookmarks_->setDocument(pdfDocument_);
  auto* pdfPage=new QWidget(this); auto* pageLayout=new QVBoxLayout(pdfPage); pageLayout->setContentsMargins(0,0,0,0);
@@ -68,14 +73,17 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),view_(new QPlainText
 #ifdef APEX_HAS_PDF
  auto* details=file->addAction("PDF details"); connect(details,&QAction::triggered,this,[this]{if(!pdfDocument_||pdfDocument_->status()!=QPdfDocument::Status::Ready){QMessageBox::information(this,"Document details","Open a PDF to inspect its engine-provided metadata.");return;}const auto field=[this](QPdfDocument::MetaDataField key){const auto value=pdfDocument_->metaData(key);return value.isValid()&&!value.toString().isEmpty()?value.toString():QString("(not provided)");};const QString report=QString("Title: %1\nAuthor: %2\nSubject: %3\nKeywords: %4\nCreator: %5\nProducer: %6\nCreated: %7\nModified: %8\nPages: %9").arg(field(QPdfDocument::MetaDataField::Title),field(QPdfDocument::MetaDataField::Author),field(QPdfDocument::MetaDataField::Subject),field(QPdfDocument::MetaDataField::Keywords),field(QPdfDocument::MetaDataField::Creator),field(QPdfDocument::MetaDataField::Producer),field(QPdfDocument::MetaDataField::CreationDate),field(QPdfDocument::MetaDataField::ModificationDate)).arg(pdfDocument_->pageCount());QMessageBox::information(this,"PDF metadata",report);});
 #endif
+ auto* library=menuBar()->addMenu("Library"); auto* index=library->addAction("Index folder…"); connect(index,&QAction::triggered,this,[this]{indexFolder();}); auto* searchIndex=library->addAction("Search indexed documents…"); searchIndex->setShortcut(QKeySequence("Ctrl+Shift+F")); connect(searchIndex,&QAction::triggered,this,[this]{searchIndexedDocuments();});
  auto* inspect=menuBar()->addMenu("Inspect"); auto* dna=inspect->addAction("Document DNA…"); dna->setShortcut(QKeySequence("Ctrl+Shift+D")); connect(dna,&QAction::triggered,this,[this]{showDocumentDna();});
  auto* capabilities=file->addAction("Capabilities"); connect(capabilities,&QAction::triggered,this,[this]{showCapabilities();}); file->addSeparator(); auto* exit=file->addAction("Exit"); connect(exit,&QAction::triggered,this,[this]{close();});
 }
+MainWindow::~MainWindow(){if(indexTask_)indexTask_->cancel();if(indexThread_&&indexThread_->isRunning())indexThread_->wait();}
 void MainWindow::openFile(){const auto path=QFileDialog::getOpenFileName(this,"Open document",{},"Documents (*.pdf *.docx *.txt *.log *.md *.csv *.tsv);;All files (*.*)");if(!path.isEmpty())loadPath(path);}
 void MainWindow::loadPath(const QString& path){const auto ext=QFileInfo(path).suffix().toLower();
 #ifdef APEX_HAS_PDF
  if(ext=="pdf"){loadPdf(path);return;}
 #endif
+ if(ext=="csv"||ext=="tsv") { QString error;const QChar delimiter=ext=="tsv"?QChar('\t'):QChar(',');if(!csvDocument_->load(path,delimiter,&error)){QMessageBox::warning(this,"Could not read delimited file",error);return;}documentText_=csvDocument_->rawText();currentPath_=path;documentKind_=ext.toUpper()+" table";documentStack_->setCurrentWidget(csvPage_);setWindowTitle(QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName()));status_->setText(QString("%1 • %2 rows × %3 columns • Delimited text table • Read-only").arg(QFileInfo(path).fileName()).arg(csvDocument_->rowCount()).arg(csvDocument_->columnCount()));return;}
  if(ext=="docx") { DocxDocument document; if(!document.load(path)){QMessageBox::warning(this,"Could not inspect DOCX",document.error);return;} documentText_=document.text; currentPath_=path; documentKind_="DOCX text extraction"; view_->setPlainText(document.text); documentStack_->setCurrentWidget(view_); setWindowTitle(QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName())); status_->setText(QString("%1 • DOCX extracted text • %2 paragraphs • %3 words • Read-only").arg(QFileInfo(path).fileName()).arg(document.paragraphCount).arg(document.words())); return; }
  const auto* capability=CapabilityRegistry::find(ext.toStdString());if(!capability||capability->support==Support::Unsupported){QMessageBox::information(this,"Format not supported",QString("%1\n\n%2").arg(capability?QString::fromStdString(capability->format):"Unknown format",capability?QString::fromStdString(capability->note):"No reader is registered for this extension."));return;}
  TextDocument document;if(!document.load(path)){QMessageBox::warning(this,"Could not open document",document.error);return;}documentText_=document.text;currentPath_=path;documentKind_="Plain text";view_->setPlainText(document.text);documentStack_->setCurrentWidget(view_);setWindowTitle(QString("%1 — APEX OFFICE READER").arg(QFileInfo(path).fileName()));status_->setText(QString("%1 • %2 words • Read-only text view").arg(QFileInfo(path).fileName()).arg(document.words()));}
@@ -85,6 +93,29 @@ void MainWindow::loadPdf(const QString& path){
 #else
  Q_UNUSED(path);QMessageBox::information(this,"PDF engine unavailable","This build was compiled without Qt PDF. The PDF capability is disabled for this build.");
 #endif
+}
+
+
+void MainWindow::indexFolder(){
+ if(indexThread_&&indexThread_->isRunning()){QMessageBox::information(this,"Indexing in progress","Wait for the current folder scan to finish before starting another.");return;}
+ const QString folder=QFileDialog::getExistingDirectory(this,"Choose a folder to index");if(folder.isEmpty())return;
+ const QString databasePath=DocumentIndex::defaultDatabasePath();auto* thread=new QThread(this);auto* task=new IndexTask(folder,databasePath);task->moveToThread(thread);indexThread_=thread;indexTask_=task;
+ QDialog progress(this);progress.setWindowTitle("Index document folder");progress.setWindowFlag(Qt::WindowCloseButtonHint,false);progress.setMinimumWidth(500);auto* layout=new QVBoxLayout(&progress);auto* label=new QLabel("Preparing supported text and DOCX files…",&progress);label->setWordWrap(true);layout->addWidget(label);auto* bar=new QProgressBar(&progress);bar->setRange(0,0);layout->addWidget(bar);auto* cancel=new QPushButton("Cancel indexing",&progress);layout->addWidget(cancel);
+ connect(thread,&QThread::started,task,&IndexTask::run);const auto cancelConnection=connect(cancel,&QPushButton::clicked,this,[task,label]{task->cancel();label->setText("Cancelling safely after the current file…");});
+ connect(task,&IndexTask::progress,&progress,[label,bar](int completed,int total,const QString& path){bar->setRange(0,qMax(1,total));bar->setValue(completed);label->setText(path.isEmpty()?QStringLiteral("Saving index…"):QFileInfo(path).fileName());});
+ connect(task,&IndexTask::finished,&progress,[&progress,label,cancel,cancelConnection](int indexed,int skipped,bool wasCancelled,const QString& error){cancel->setText("Done");QObject::disconnect(cancelConnection);QString summary=QString("Indexed or refreshed %1 files; %2 files were skipped.").arg(indexed).arg(skipped);if(wasCancelled)summary+=QStringLiteral(" Scan cancelled; completed entries were saved.");if(!error.isEmpty())summary+=QStringLiteral("\nDatabase error: ")+error;label->setText(summary);connect(cancel,&QPushButton::clicked,&progress,&QDialog::accept);});
+ connect(task,&IndexTask::finished,thread,&QThread::quit);connect(thread,&QThread::finished,task,&QObject::deleteLater);connect(thread,&QThread::finished,thread,&QObject::deleteLater);
+ QPointer<QThread> threadGuard(thread);thread->start();progress.exec();if(threadGuard&&threadGuard->isRunning())threadGuard->wait();indexTask_.clear();indexThread_.clear();
+}
+
+void MainWindow::searchIndexedDocuments(){
+ bool ok=false;const QString query=QInputDialog::getText(this,"Search APEX index","Search words (all terms must match):",QLineEdit::Normal,{},&ok);if(!ok||query.trimmed().isEmpty())return;
+ const QString databasePath=DocumentIndex::defaultDatabasePath();QString error;const auto hits=DocumentIndex::search(query,databasePath,&error);
+ if(!error.isEmpty()){QMessageBox::information(this,"APEX search",QString("The local index could not be searched: %1\n\nUse Library → Index folder to build or refresh it.").arg(error));return;}
+ QDialog results(this);results.setWindowTitle(QString("Search results · %1").arg(query));results.resize(760,520);auto* layout=new QVBoxLayout(&results);auto* list=new QListWidget(&results);layout->addWidget(list);auto* hint=new QLabel("Double-click a result to open it. Excerpts are extracted text and may omit layout.",&results);layout->addWidget(hint);
+ for(const auto& hit:hits){auto* item=new QListWidgetItem(QString("%1   ·   .%2").arg(QFileInfo(hit.path).fileName(),hit.extension),list);item->setData(Qt::UserRole,hit.path);item->setToolTip(hit.excerpt);}
+ if(hits.isEmpty())list->addItem("No indexed documents matched every search term.");
+ connect(list,&QListWidget::itemDoubleClicked,&results,[this,&results](QListWidgetItem* item){const QString path=item->data(Qt::UserRole).toString();if(!path.isEmpty()){results.accept();loadPath(path);}});results.exec();
 }
 
 void MainWindow::showDocumentDna(){
