@@ -281,6 +281,27 @@ MainWindow::MainWindow(QWidget *parent)
   auto *dna = inspect->addAction("Document DNA…");
   dna->setShortcut(QKeySequence("Ctrl+Shift+D"));
   connect(dna, &QAction::triggered, this, [this] { showDocumentDna(); });
+  auto *wordReview = inspect->addAction("DOCX review details…");
+  connect(wordReview, &QAction::triggered, this, [this] {
+    if (QFileInfo(currentPath_).suffix().compare("docx", Qt::CaseInsensitive) !=
+        0) {
+      QMessageBox::information(this, "DOCX review details",
+                               "Open a DOCX document first.");
+      return;
+    }
+    QDialog dialog(this);
+    dialog.setWindowTitle("DOCX tracked changes and comments");
+    dialog.resize(720, 520);
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *details = new QPlainTextEdit(&dialog);
+    details->setReadOnly(true);
+    details->setPlainText(docxReviewDetails_);
+    layout->addWidget(details, 1);
+    auto *close = new QPushButton("Close", &dialog);
+    layout->addWidget(close);
+    connect(close, &QPushButton::clicked, &dialog, &QDialog::accept);
+    dialog.exec();
+  });
   auto *capabilities = file->addAction("Capabilities");
   connect(capabilities, &QAction::triggered, this,
           [this] { showCapabilities(); });
@@ -424,6 +445,31 @@ void MainWindow::loadPath(const QString &path) {
     documentText_ = document.text;
     currentPath_ = path;
     documentKind_ = "DOCX text extraction";
+    docxReviewDetails_ =
+        QString("Tracked insertions: %1\nTracked deletions: %2\n\n")
+            .arg(static_cast<qlonglong>(document.insertedRevisionCount))
+            .arg(static_cast<qlonglong>(document.deletedRevisionCount));
+    if (document.comments.isEmpty()) {
+      docxReviewDetails_ +=
+          "No comments part was present in this DOCX package.";
+    } else {
+      docxReviewDetails_ +=
+          QString("Comments: %1\n\n").arg(document.comments.size());
+      for (qsizetype i = 0; i < document.comments.size(); ++i) {
+        const auto &comment = document.comments.at(i);
+        docxReviewDetails_ +=
+            QString("%1. Comment %2 · %3%4\n%5\n\n")
+                .arg(static_cast<qlonglong>(i + 1))
+                .arg(comment.id.isEmpty() ? QStringLiteral("(no id)")
+                                          : comment.id)
+                .arg(comment.author.isEmpty() ? QStringLiteral("Unknown author")
+                                              : comment.author)
+                .arg(comment.date.isEmpty()
+                         ? QString()
+                         : QString(" · %1").arg(comment.date))
+                .arg(comment.text);
+      }
+    }
     view_->setPlainText(document.text);
     documentStack_->setCurrentWidget(view_);
     setWindowTitle(

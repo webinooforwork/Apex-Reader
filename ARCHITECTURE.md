@@ -2,7 +2,7 @@
 
 The project uses a small, layered C++20 application. `app/` owns the Qt entry point and main window. `core/` contains format capability declarations, `engines/` contains format-specific readers, and `ui/`, `search/`, `database/`, and further subsystem directories are reserved for implementations as they become real.
 
-`CapabilityRegistry` is the contract shown to users: extensions without an implementation report `Unsupported`. The text reader handles bounded UTF-8 files. The DOCX reader uses libzip and QXmlStreamReader to extract bounded main-part text without running macros or loading external parts. When Qt PDF is present, the PDF workspace uses Qt PDF/PDFium for PDF rendering, text search, bookmark outline navigation, metadata inspection, and extraction. It does not render DOCX layout or parse HTML, Markdown syntax, PPTX.
+`CapabilityRegistry` is the contract shown to users: extensions without an implementation report `Unsupported`. The text reader handles bounded UTF-8 files. The DOCX reader uses libzip and QXmlStreamReader to extract bounded main-part text, count tracked insertion/deletion runs, and read comment author/date/text from the optional comments part. It does not run macros or load external relationships. When Qt PDF is present, the PDF workspace uses Qt PDF/PDFium for PDF rendering, text search, bookmark outline navigation, metadata inspection, and extraction. It does not render DOCX layout or parse HTML, Markdown syntax, PPTX.
 
 Format parsers are isolated from the UI and return explicit errors. Folder indexing runs in a cancellable background worker; opening DOCX, CSV/TSV, XLSX/ODS, and ODT/ODP currently parses on the UI thread. SQLite FTS5 stores the local index. Windows builds request Qt PDF, which uses PDFium internally.
 
@@ -15,3 +15,5 @@ CSV and TSV are parsed into a bounded read-only `QAbstractTableModel`. The parse
 The XLSX reader resolves workbook relationships inside the OOXML package, extracts shared and inline strings, and reads worksheet cell references, cached values, and formula text using bounded ZIP/XML parsing. A read-only table model renders sparse cell maps across worksheet tabs; formula evaluation and workbook styling are unsupported.
 
 OpenDocument text extraction reads bounded `content.xml` from ODT/ODP archives and emits paragraph or slide text. The ODS parser expands bounded repeated rows/cells into the shared sparse spreadsheet model and retains cached typed values and formula text; it does not evaluate formulas or load external links.
+
+The Inspect → DOCX review details panel reports tracked insertion/deletion run counts from `word/document.xml` and extracts comment text and author/date metadata from `word/comments.xml` when present. It is an inspection aid: it does not resolve comment anchors to exact displayed ranges, accept/reject changes, or claim to reconstruct revision history. Each XML part is capped at 32 MiB and comments at 10,000 entries.

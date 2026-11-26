@@ -15,6 +15,7 @@ Status values describe code in this repository. “Implemented” means present 
 | PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; Windows CI compiles and packages it |
 | PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
 | DOCX text extraction | Tested | libzip + QXmlStreamReader; paragraphs, headings, table-cell text; bounded ZIP/XML; Windows/Linux regression tests pass |
+| DOCX review inspection | Implemented | Counts tracked insertion/deletion runs and extracts comment author, date, and text from bounded comments.xml; read-only; not runtime-tested in this turn |
 | CSV/TSV table view | Implemented | Read-only model with quoted/multiline cells, cell selection and find-next, bounded to 500,000 cells; not runtime-tested in this turn |
 | XLSX workbook inspection | Implemented | Read-only multi-sheet cells, shared/inline strings, cached values, formula text view; 300,000-cell and 256 MiB expanded XML limits; no calculation/styles/charts; not runtime-tested in this turn |
 | PPTX | Unsupported | No presentation parser/renderers |

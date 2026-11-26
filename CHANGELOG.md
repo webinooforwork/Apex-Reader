@@ -1,3 +1,7 @@
+## Unreleased
+
+- Added read-only DOCX tracked insertion/deletion counts and comment text/author/date inspection.
+
 # Changelog
 
 ## 0.1.0 — foundation

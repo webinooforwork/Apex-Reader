@@ -47,6 +47,7 @@ private:
   QString currentPath_;
   QString documentText_;
   QString documentKind_;
+  QString docxReviewDetails_;
   QPointer<QThread> indexThread_;
   QPointer<IndexTask> indexTask_;
   CsvDocument *csvDocument_{};
