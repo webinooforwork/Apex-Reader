@@ -7,7 +7,12 @@ const std::vector<Capability>& CapabilityRegistry::all() {
  {"txt","Plain text",Support::Viewing,"UTF-8 text display"}, {"md","Markdown",Support::Viewing,"Displayed as source text; Markdown rendering is not yet implemented"},
  {"csv","Comma-separated values",Support::Viewing,"Text display only; no spreadsheet parsing"}, {"tsv","Tab-separated values",Support::Viewing,"Text display only"},
  {"log","Text log",Support::Viewing,"UTF-8 text display"},
- {"pdf","PDF",Support::Unsupported,"No PDF engine linked yet"}, {"docx","Word OOXML",Support::Unsupported,"No OOXML parser linked yet"}, {"xlsx","Excel OOXML",Support::Unsupported,"No workbook parser linked yet"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
+ #ifdef APEX_HAS_PDF
+ {"pdf","PDF",Support::Viewing,"Qt PDF (PDFium): read-only rendering, text search, page navigation, and text export"},
+#else
+ {"pdf","PDF",Support::Unsupported,"Qt PDF (PDFium) was not available in this build"},
+#endif
+ {"docx","Word OOXML",Support::Unsupported,"No OOXML parser linked yet"}, {"xlsx","Excel OOXML",Support::Unsupported,"No workbook parser linked yet"}, {"pptx","PowerPoint OOXML",Support::Unsupported,"No presentation parser linked yet"},
  {"odt","OpenDocument Text",Support::Unsupported,"No OpenDocument parser linked yet"}, {"ods","OpenDocument Spreadsheet",Support::Unsupported,"No OpenDocument parser linked yet"}, {"odp","OpenDocument Presentation",Support::Unsupported,"No OpenDocument parser linked yet"},
  {"rtf","Rich Text Format",Support::Unsupported,"No RTF parser linked yet"}, {"html","HTML",Support::Unsupported,"No safe HTML document engine linked yet"}, {"epub","EPUB",Support::Unsupported,"No EPUB engine linked yet"}, {"png","PNG image",Support::Unsupported,"No image viewer connected yet"}, {"jpg","JPEG image",Support::Unsupported,"No image viewer connected yet"}
  }; return items;

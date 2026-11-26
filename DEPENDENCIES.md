@@ -13,6 +13,10 @@
 - Windows CI: Qt 6.8.3 MSVC 2022 x64 via `jurplel/install-qt-action`, CMake, Ninja, and MSVC runner tools.
 - Linux CI: distribution Qt 6 Widgets development package, CMake, Ninja.
 
+## PDF engine
+
+The Windows workflow installs Qt PDF (qtpdf), which provides PDFium based parsing and rendering through Qt APIs. CMake detects it optionally; builds without the module report PDF as unsupported. Qt PDF is distributed as a separate Qt extension for Qt 6.8.
+
 ## Not yet dependencies
 
-PDFium, SQLite, Tesseract, OOXML/OpenDocument parsers, and AI provider SDKs are not configured or linked. Capabilities depending on them are marked unsupported or planned.
+SQLite, Tesseract, OOXML/OpenDocument parsers, and AI provider SDKs are not configured or linked. Capabilities depending on them are marked unsupported or planned.

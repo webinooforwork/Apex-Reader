@@ -10,7 +10,8 @@ Status values describe code in this repository. “Implemented” means present 
 | Plain text reading | Implemented | UTF-8, read-only, 32 MiB file limit |
 | Word count | Implemented | Whitespace token count |
 | Capability registry | Implemented | Explicit unsupported reporting |
-| PDF rendering and editing | Unsupported | No PDF engine |
+| PDF rendering, search, navigation, text extraction/export | Implemented | Qt PDF / PDFium; read-only; Windows workflow installs qtpdf; needs successful CI verification |
+| PDF edit/merge/split/signature/repair/validation | Unsupported | No write/edit tools or validators |
 | DOCX/XLSX/PPTX | Unsupported | No OOXML parser/renderers |
 | OpenDocument | Unsupported | No parser |
 | Search and persistent index | Planned | — |

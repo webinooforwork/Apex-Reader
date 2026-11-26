@@ -4,9 +4,9 @@ APEX is a native C++20 Windows document workspace developed from Termux and buil
 
 ## Current state
 
-This is an early foundation, not a universal reader yet. The Qt 6 desktop shell currently opens UTF-8 plain text (`.txt`, `.log`, `.md`, `.csv`, `.tsv`) in read-only mode and reports word count. Markdown, CSV, and TSV are shown as text, not interpreted. The capability registry labels formats without a connected engine as unsupported, including PDF, Office, and OpenDocument.
+This is an early release and the universal workspace is being built in stages. The Qt 6 desktop app reads UTF-8 text (`.txt`, `.log`, `.md`, `.csv`, `.tsv`) and, when Qt PDF is installed, uses PDFium through Qt PDF for PDF viewing. PDF controls include continuous or single-page mode, fit/custom zoom, full-text search with highlights, search-result navigation, password prompts, and text export. The text-family reader is read-only; Markdown, CSV, and TSV are displayed as text rather than interpreted. PDF is listed as supported only in builds that include the PDF engine. Office and OpenDocument formats remain unsupported.
 
-See [FEATURE_STATUS.md](FEATURE_STATUS.md) for the implementation ledger. No PDF/OOXML/OCR/AI engine is bundled yet.
+See [FEATURE_STATUS.md](FEATURE_STATUS.md) for the implementation ledger. No OOXML, OCR, or AI engine is bundled yet.
 
 ## Build
 
